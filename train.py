@@ -57,6 +57,7 @@ def train(model):
 		plt.plot(store_epoch_loss_val, label="Validation Loss")
 		plt.plot(store_epoch_acc_val, label="Validation Accuracy")
 		plt.legend()
+		plt.grid()
 		plt.savefig("{}/Loss.png".format(training_dir))
 		plt.close()
 		model.train()
