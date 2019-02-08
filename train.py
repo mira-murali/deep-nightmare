@@ -52,7 +52,7 @@ def train(model):
 			epoch_loss_val = torch.FloatTensor(store_batch_loss_val).mean()
 			epoch_acc_val = torch.FloatTensor(store_batch_acc_val).mean()
 		store_epoch_loss_val.append(epoch_loss_val)
-		store_epoch_acc_val.append(epoch_acc_val)
+		store_epoch_acc_val.append(1-epoch_acc_val)
 		plt.plot(store_epoch_loss_val, label="Validation Loss")
 		plt.plot(store_epoch_acc_val, label="Validation Accuracy")
 		plt.legend()

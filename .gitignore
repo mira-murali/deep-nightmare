@@ -1,1 +1,3 @@
-./data/*
+data
+training_*
+__pycache__
