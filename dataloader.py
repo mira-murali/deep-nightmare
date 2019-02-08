@@ -3,7 +3,7 @@ import os
 import numpy as np
 from skimage import io
 from PIL import Image
-
+import hyperparameters as hyp
 import torch.nn as nn
 import torchvision.transforms as transforms
 import torch.utils.data as data
@@ -67,8 +67,15 @@ class nightmareDataset(data.Dataset):
         label = int(self.txtfile[idx][1])
         return im, label
 
+def get_loaders():
+    train_dataset = nightmareDataset(txtfile='train.txt', isTrain=True)
+    val_dataset = nightmareDataset(txtfile='val.txt', isTrain=False)
+    train_dataloader = data.DataLoader(train_dataset, shuffle=True, batch_size=48, pin_memory=True)
+    val_dataloader = data.DataLoader(val_dataset, shuffle=False, batch_size=48, pin_memory=True)
+    return train_dataloader, val_dataloader
+
 if __name__ == "__main__":
     dataset = nightmareDataset(txtfile='val.txt', isTrain=False)
-    dataloader = data.DataLoader(dataset, shuffle=True, batch_size=32)
+    dataloader = data.DataLoader(dataset, shuffle=True, batch_size=48)
     for i, (data, target) in enumerate(dataloader):
         print(data.shape)

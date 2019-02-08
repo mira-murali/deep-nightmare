@@ -4,8 +4,8 @@ from random import shuffle
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--dir', type=str, help='Specify the path to the directory that contains images')
-parser.add_argument('--save-dir', type=str, help='Specify path to directory to save train, val txt files')
+parser.add_argument('--dir', type=str, help='Specify the path to the directory that contains images', default='data')
+parser.add_argument('--save-dir', type=str, help='Specify path to directory to save train, val txt files', default ='.')
 args = parser.parse_args()
 
 def writePathToFile():
