@@ -12,6 +12,7 @@ import hyperparameters as hyp
 
 
 def train(model):
+	print("Training...")
 	training_dir = "./training_ResNet{}_{}".format(hyp.DEPTH, time.time())
 	os.mkdir(training_dir)
 	model.train()
@@ -22,47 +23,56 @@ def train(model):
 	store_epoch_loss = [] 
 	store_epoch_loss_val = [] 
 	store_epoch_acc_val = [] 
-	while True:
-		epoch = epoch + 1
-		epoch_loss = 0 
-		store_batch_loss = []
-		for batch_num, (image, label) in tqdm(enumerate(train_loader)):
-			optimizer.zero_grad()
-			prediction = model.forward(image.cuda())
-			batch_loss = loss(prediction, label.cuda())
-			batch_loss.backward()
-			optimizer.step()
-			store_batch_loss.append(batch_loss.clone().cpu())
-			epoch_loss = torch.FloatTensor(store_batch_loss).mean()
-		store_epoch_loss.append(epoch_loss)
-		torch.save(model.state_dict(), "{}/checkpoint_{}.pth".format(training_dir, epoch))
-		plt.plot(store_epoch_loss, label="Training Loss")
-
-		model.eval()
-		epoch_loss_val = 0 
-		epoch_acc_val = 0 
-		store_batch_loss_val = []
-		store_batch_acc_val = []
-		for batch_num, (image, label) in tqdm(enumerate(val_loader)):
-			with torch.no_grad():
+	try:
+		for e in tqdm(range(100)):
+			epoch = e + 1
+			epoch_loss = 0 
+			store_batch_loss = []
+			for batch_num, (image, label) in enumerate(train_loader):
+				optimizer.zero_grad()
 				prediction = model.forward(image.cuda())
-			batch_loss = loss(prediction, label.cuda())
-			batch_acc = torch.abs(prediction.max(-1)[-1].squeeze().cpu()-label).float().mean()
-			store_batch_loss_val.append(batch_loss.cpu())
-			store_batch_acc_val.append(batch_acc)
-			epoch_loss_val = torch.FloatTensor(store_batch_loss_val).mean()
-			epoch_acc_val = torch.FloatTensor(store_batch_acc_val).mean()
-		store_epoch_loss_val.append(epoch_loss_val)
-		store_epoch_acc_val.append(1-epoch_acc_val)
-		plt.plot(store_epoch_loss_val, label="Validation Loss")
-		plt.plot(store_epoch_acc_val, label="Validation Accuracy")
-		plt.legend()
-		plt.grid()
-		plt.savefig("{}/Loss.png".format(training_dir))
-		plt.close()
-		model.train()
+				batch_loss = loss(prediction, label.cuda())
+				batch_loss.backward()
+				optimizer.step()
+				store_batch_loss.append(batch_loss.clone().cpu())
+				epoch_loss = torch.FloatTensor(store_batch_loss).mean()
+			store_epoch_loss.append(epoch_loss)
+			torch.save(model.state_dict(), "{}/checkpoint_{}.pth".format(training_dir, epoch))
+			plt.plot(store_epoch_loss, label="Training Loss")
 
-		#Validate and auto-stop when overfitting
+			model.eval()
+			epoch_loss_val = 0 
+			epoch_acc_val = 0 
+			store_batch_loss_val = []
+			store_batch_acc_val = []
+			for batch_num, (image, label) in enumerate(val_loader):
+				with torch.no_grad():
+					prediction = model.forward(image.cuda())
+				batch_loss = loss(prediction, label.cuda())
+				batch_acc = torch.abs(prediction.max(-1)[-1].squeeze().cpu()-label).float().mean()
+				store_batch_loss_val.append(batch_loss.cpu())
+				store_batch_acc_val.append(batch_acc)
+				epoch_loss_val = torch.FloatTensor(store_batch_loss_val).mean()
+				epoch_acc_val = torch.FloatTensor(store_batch_acc_val).mean()
+			store_epoch_loss_val.append(epoch_loss_val)
+			store_epoch_acc_val.append(1-epoch_acc_val)
+			plt.plot(store_epoch_loss_val, label="Validation Loss")
+			plt.plot(store_epoch_acc_val, label="Validation Accuracy")
+			plt.legend()
+			plt.grid()
+			plt.savefig("{}/Loss.png".format(training_dir))
+			plt.close()
+			model.train()
+		most_acc = max(store_epoch_acc_val)
+		print("\nHighest accuracy of {} occured at {}%...".format(most_acc, store_epoch_acc_val.index(most_acc)))
+		user_pick = input("Which checkpoint do you want to use ?\n")
+		model.load_state_dict(torch.load("{}/checkpoint_{}.pth".format(training_dir, user_pick)))
+	except KeyboardInterrupt:
+		most_acc = max(store_epoch_acc_val)
+		print("Highest accuracy of {} occured at {}...".format(most_acc, store_epoch_acc_val.index(most_acc)))
+		user_pick = input("Which checkpoint do you want to use ?")
+		model.load_state_dict(torch.load("{}/checkpoint_{}.pth".format(training_dir, user_pick)))
+		
 	return model
 
 
