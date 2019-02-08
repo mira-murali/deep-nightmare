@@ -8,10 +8,11 @@ from dataloader import get_loaders
 import torch.nn as nn
 from model import Model
 import matplotlib.pyplot as plt
+import hyperparameters as hyp
 
 
 def train(model):
-	training_dir = "./training_{}".format(time.time())
+	training_dir = "./training_ResNet{}_{}".format(hyp.DEPTH, time.time())
 	os.mkdir(training_dir)
 	model.train()
 	optimizer = optim.Adam(model.parameters(), lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
