@@ -5,7 +5,7 @@ import numpy as np
 import torch
 import scipy.ndimage as nd
 from torch.autograd import Variable
-import hyperparamters
+import hyperparameters as hyp
 
 
 def showarray(a, fmt='jpeg'):
@@ -36,7 +36,6 @@ def make_step(img, model, control=None, distance=objective_L2):
     max_jitter = 32
     num_iterations = 20
     show_every = 10
-    end_layer = 3
     guide_features = control
 
     for i in range(num_iterations):
@@ -50,7 +49,7 @@ def make_step(img, model, control=None, distance=objective_L2):
         else:
             img_variable = Variable(img_tensor, requires_grad=True)
 
-        act_value = model.forward(img_variable, end_layer)
+        act_value = model.resnet(img_variable, hyp.END_LAYER)
         diff_out = distance(act_value, guide_features)
         act_value.backward(diff_out)
         ratio = np.abs(img_variable.grad.data.cpu().numpy()).mean()
@@ -67,7 +66,7 @@ def make_step(img, model, control=None, distance=objective_L2):
 
 def dream(model,
           base_img,
-          octave_n=OCTAVES,    #was 6
+          octave_n=6,
           octave_scale=1.4,
           control=None,
           distance=objective_L2):

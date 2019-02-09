@@ -38,7 +38,7 @@ def train(model):
 				epoch_loss = torch.FloatTensor(store_batch_loss).mean()
 			store_epoch_loss.append(epoch_loss)
 			torch.save(model.state_dict(), "{}/checkpoint_{}.pth".format(training_dir, epoch))
-			plt.plot(store_epoch_loss, label="Training Loss")
+			plt.plot(store_epoch_loss[1:], label="Training Loss")
 
 			model.eval()
 			epoch_loss_val = 0 
@@ -56,24 +56,26 @@ def train(model):
 				epoch_acc_val = torch.FloatTensor(store_batch_acc_val).mean()
 			store_epoch_loss_val.append(epoch_loss_val)
 			store_epoch_acc_val.append(1-epoch_acc_val)
-			plt.plot(store_epoch_loss_val, label="Validation Loss")
-			plt.plot(store_epoch_acc_val, label="Validation Accuracy")
+			plt.plot(store_epoch_loss_val[1:], label="Validation Loss")
+			plt.plot(store_epoch_acc_val[1:], label="Validation Accuracy")
 			plt.legend()
 			plt.grid()
 			plt.savefig("{}/Loss.png".format(training_dir))
 			plt.close()
 			model.train()
 		most_acc = max(store_epoch_acc_val)
-		print("\nHighest accuracy of {} occured at {}%...".format(most_acc, store_epoch_acc_val.index(most_acc)))
+		print("\nHighest accuracy of {} occured at {}%...".format(most_acc, store_epoch_acc_val.index(most_acc)+1))
 		user_pick = input("Which checkpoint do you want to use ?\n")
 		model.load_state_dict(torch.load("{}/checkpoint_{}.pth".format(training_dir, user_pick)))
 	except KeyboardInterrupt:
 		most_acc = max(store_epoch_acc_val)
-		print("Highest accuracy of {} occured at {}...".format(most_acc, store_epoch_acc_val.index(most_acc)))
-		user_pick = input("Which checkpoint do you want to use ?")
+		print("\nHighest accuracy of {} occured at {}...".format(most_acc, store_epoch_acc_val.index(most_acc)+1))
+		user_pick = input("Which checkpoint do you want to use ?\n")
 		model.load_state_dict(torch.load("{}/checkpoint_{}.pth".format(training_dir, user_pick)))
 		
-	return model
+	return model.cuda()
 
 
-train(Model().cuda())
+
+if __name__ == "__main__":
+	train(Model().cuda())

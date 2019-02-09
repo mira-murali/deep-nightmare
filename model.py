@@ -27,6 +27,21 @@ class Model(nn.Module):
 		"""
 		return output
 
+	def resnet(self, input_image, end_layer):
+		"""
+		end_layer range from 1 to 4
+		"""
+		x = self.base_model.conv1(input_image)
+		x = self.base_model.bn1(x)
+		x = self.base_model.relu(x)
+		x = self.base_model.maxpool(x)
+
+		layers = [self.base_model.layer1, self.base_model.layer2, self.base_model.layer3, self.base_model.layer4]
+		for i in range(end_layer):
+			x = layers[i](x)
+		return x
+
+
 	def train(self):
 		self.base_model.train()
 
