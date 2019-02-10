@@ -76,6 +76,7 @@ def writePathToFile():
 
     for dir in directories:
         images = glob.glob(os.path.join(dir, '*'))
+        images.sort()
         label = ""
         line = 1
         count = 1
