@@ -78,7 +78,7 @@ class nightmareDataset(data.Dataset):
             label = 0
         return im, label
 
-def get_loaders(loader):
+def get_loader(loader):
     if loader == 'train':
         dataset = nightmareDataset(txtfile='train.txt', isTrain=True)
         dataloader = data.DataLoader(dataset, shuffle=True, batch_size=48//(hyp.DEPTH//50), pin_memory=True)

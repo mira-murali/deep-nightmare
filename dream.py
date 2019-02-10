@@ -2,41 +2,43 @@ import PIL.Image
 from io import BytesIO
 from IPython.display import clear_output, Image, display
 import numpy as np
-import torch
+import torch, os, time
 import scipy.ndimage as nd
 from torch.autograd import Variable
 import hyperparameters as hyp
+import warnings
+from tqdm import tqdm
 
-
-def showarray(a, fmt='jpeg'):
+def showarray(a, file_name, iterations, experiment_path, fmt='jpeg'):
     a = np.uint8(np.clip(a, 0, 255))
-    f = BytesIO()
-    PIL.Image.fromarray(a).save(f, fmt)
-    display(Image(data=f.getvalue()))
+    for img in a:
+        if img.shape[0]==224:
+            PIL.Image.fromarray(img).save(experiment_path+"/iteration_{}/{}".format(iterations, file_name), fmt)
+            file_name=file_name+1
+    
 
-
-def showtensor(a):
-    mean = np.array([0.485, 0.456, 0.406]).reshape([1, 1, 3])
-    std = np.array([0.229, 0.224, 0.225]).reshape([1, 1, 3])
-    inp = a[0, :, :, :]
-    inp = inp.transpose(1, 2, 0)
+def showtensor(a, file_name, iterations, experiment_path):
+    mean = np.tile(np.array([0.485, 0.456, 0.406]).reshape([1, 1, 1, 3]), [a.shape[0],1,1,1])
+    std = np.tile(np.array([0.229, 0.224, 0.225]).reshape([1, 1, 1, 3]), [a.shape[0],1,1,1])
+    inp = a
+    inp = inp.transpose(0, 2, 3, 1)
     inp = std * inp + mean
     inp *= 255
-    showarray(inp)
-    clear_output(wait=True)
+    showarray(inp, file_name, iterations, experiment_path)
 
 def objective_L2(dst, guide_features):
     return dst.data
 
-def make_step(img, model, control=None, distance=objective_L2):
+def make_step(base_img, img, model, file_name, experiment_path, control=None, distance=objective_L2):
     mean = np.array([0.485, 0.456, 0.406]).reshape([3, 1, 1])
     std = np.array([0.229, 0.224, 0.225]).reshape([3, 1, 1])
     
     learning_rate = 2e-2
     max_jitter = 32
-    num_iterations = 20
+    num_iterations = hyp.ITERATIONS
     show_every = 10
     guide_features = control
+    iteration_stack = []
 
     for i in range(num_iterations):
         shift_x, shift_y = np.random.randint(-max_jitter, max_jitter + 1, 2)
@@ -60,16 +62,23 @@ def make_step(img, model, control=None, distance=objective_L2):
         img[0, :, :, :] = np.clip(img[0, :, :, :], -mean / std,
                                   (1 - mean) / std)
         if i == 0 or (i + 1) % show_every == 0:
-            showtensor(img)
-    return img
+            if img.shape[2]==224:
+                iteration_stack.append(img)
+                showtensor(np.concatenate((base_img,img),axis=3), file_name, i+1, experiment_path)
+            else:
+                showtensor(img, file_name, i+1, experiment_path)
+    return img, iteration_stack
 
 
 def dream(model,
           base_img,
+          file_name,
+          experiment_path,
           octave_n=6,
           octave_scale=1.4,
           control=None,
           distance=objective_L2):
+    warnings.filterwarnings('ignore', '.*output shape of zoom.*')
     octaves = [base_img]
     for i in range(octave_n - 1):
         octaves.append(
@@ -86,6 +95,6 @@ def dream(model,
                 detail, (1, 1, 1.0 * h / h1, 1.0 * w / w1), order=1)
 
         input_oct = octave_base + detail
-        print(input_oct.shape)
-        out = make_step(input_oct, model, control, distance=distance)
+        out, iteration_stack = make_step(base_img, input_oct, model, file_name, experiment_path, control, distance=distance)
         detail = out - octave_base
+    return iteration_stack

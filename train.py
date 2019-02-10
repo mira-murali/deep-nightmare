@@ -4,7 +4,7 @@ import torch.cuda as cuda
 import numpy as np
 from tqdm import tqdm
 import torch.utils.data as data
-from dataloader import get_loaders
+from dataloader import get_loader
 import torch.nn as nn
 from model import Model
 import matplotlib.pyplot as plt
@@ -18,7 +18,7 @@ def train(model):
 	model.train()
 	optimizer = optim.Adam(model.parameters(), lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
 	loss = nn.CrossEntropyLoss().cuda()
-	train_loader = get_loaders(loader='train')
+	train_loader = get_loader(loader='train')
 	epoch = 0
 	store_epoch_loss = []
 	store_epoch_loss_val = []
@@ -45,7 +45,7 @@ def train(model):
 			epoch_acc_val = 0
 			store_batch_loss_val = []
 			store_batch_acc_val = []
-			val_loader = get_loaders(loader='val')
+			val_loader = get_loader(loader='val')
 			for batch_num, (image, label) in enumerate(val_loader):
 				with torch.no_grad():
 					prediction = model.forward(image.cuda())
@@ -74,7 +74,7 @@ def train(model):
 		user_pick = input("Which checkpoint do you want to use ?\n")
 		model.load_state_dict(torch.load("{}/checkpoint_{}.pth".format(training_dir, user_pick)))
 
-	return model.cuda()
+	return model.cuda(), training_dir
 
 
 
