@@ -10,7 +10,7 @@ import torch.utils.data as data
 
 
 class nightmareDataset(data.Dataset):
-    def __init__(self, txtfile='train.txt', isTrain=True):
+    def __init__(self, txtfile='train.txt', isTrain=True, isTest=False):
         self.normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
         self.toTensor = transforms.ToTensor()
@@ -29,15 +29,23 @@ class nightmareDataset(data.Dataset):
         self.norm = transforms.Compose([transforms.Resize(224), self.toTensor, self.normalize])
         self.transform = [self.hRotation, self.vRotation, self.randomCrop, self.lighten, self.norm]
 
-        lines = open(txtfile).readlines()
-        self.txtfile = [line.strip('\n').split(', ') for line in lines]
+        self.isTest = isTest
         self.isTrain = isTrain
+        lines = open(txtfile).readlines()
+        if not self.isTest:
+            self.txtfile = [line.strip('\n').split(',') for line in lines]
+        else:
+            self.txtfile = [line.strip('\n') for line in lines]
+
 
     def __len__(self):
         return len(self.txtfile)
 
     def __getitem__(self, idx):
-        im =Image.open(self.txtfile[idx][0]).convert('RGB')
+        if not self.isTest:
+            im =Image.open(self.txtfile[idx][0]).convert('RGB')
+        else:
+            im =Image.open(self.txtfile[idx]).convert('RGB')
         im = np.asarray(im, np.uint8)
         if len(im.shape) > 2 and im.shape[-1] > 3:
             im = im[:, :, :3]
@@ -64,18 +72,21 @@ class nightmareDataset(data.Dataset):
             im = im[:, :im.shape[2], :]
         elif im.shape[2] > im.shape[1]:
             im = im[:, :, :im.shape[1]]
-        label = int(self.txtfile[idx][1])
+        if not self.isTest:
+            label = int(self.txtfile[idx][1])
+        else:
+            label = 0
         return im, label
 
-def get_loaders():
-    train_dataset = nightmareDataset(txtfile='train.txt', isTrain=True)
-    val_dataset = nightmareDataset(txtfile='val.txt', isTrain=False)
-    train_dataloader = data.DataLoader(train_dataset, shuffle=True, batch_size=48//(hyp.DEPTH//50), pin_memory=True)
-    val_dataloader = data.DataLoader(val_dataset, shuffle=False, batch_size=48//(hyp.DEPTH//50), pin_memory=True)
-    return train_dataloader, val_dataloader
+def get_loaders(loader):
+    if loader == 'train':
+        dataset = nightmareDataset(txtfile='train.txt', isTrain=True)
+        dataloader = data.DataLoader(dataset, shuffle=True, batch_size=48//(hyp.DEPTH//50), pin_memory=True)
+    elif loader == 'val':
+        dataset = nightmareDataset(txtfile='val.txt', isTrain=False)
+        dataloader = data.DataLoader(dataset, shuffle=False, batch_size=48//(hyp.DEPTH//50), pin_memory=True)
+    elif loader == 'test':
+        dataset = nightmareDataset(txtfile='test.txt', isTrain=False, isTest=True)
+        dataloader = data.DataLoader(dataset, shuffle=False, batch_size=48//(hyp.DEPTH//50), pin_memory=True)
 
-if __name__ == "__main__":
-    dataset = nightmareDataset(txtfile='val.txt', isTrain=False)
-    dataloader = data.DataLoader(dataset, shuffle=True, batch_size=48)
-    for i, (data, target) in enumerate(dataloader):
-        print(data.shape)
+    return dataloader

@@ -18,15 +18,15 @@ def train(model):
 	model.train()
 	optimizer = optim.Adam(model.parameters(), lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
 	loss = nn.CrossEntropyLoss().cuda()
-	train_loader, val_loader = get_loaders()
+	train_loader = get_loaders(loader='train')
 	epoch = 0
-	store_epoch_loss = [] 
-	store_epoch_loss_val = [] 
-	store_epoch_acc_val = [] 
+	store_epoch_loss = []
+	store_epoch_loss_val = []
+	store_epoch_acc_val = []
 	try:
 		for e in tqdm(range(100)):
 			epoch = e + 1
-			epoch_loss = 0 
+			epoch_loss = 0
 			store_batch_loss = []
 			for batch_num, (image, label) in enumerate(train_loader):
 				optimizer.zero_grad()
@@ -41,8 +41,8 @@ def train(model):
 			plt.plot(store_epoch_loss[1:], label="Training Loss")
 
 			model.eval()
-			epoch_loss_val = 0 
-			epoch_acc_val = 0 
+			epoch_loss_val = 0
+			epoch_acc_val = 0
 			store_batch_loss_val = []
 			store_batch_acc_val = []
 			for batch_num, (image, label) in enumerate(val_loader):
@@ -72,7 +72,7 @@ def train(model):
 		print("\nHighest accuracy of {} occured at {}...".format(most_acc, store_epoch_acc_val.index(most_acc)+1))
 		user_pick = input("Which checkpoint do you want to use ?\n")
 		model.load_state_dict(torch.load("{}/checkpoint_{}.pth".format(training_dir, user_pick)))
-		
+
 	return model.cuda()
 
 
