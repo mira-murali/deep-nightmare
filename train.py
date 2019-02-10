@@ -17,7 +17,7 @@ def train(model):
 	os.mkdir(training_dir)
 	os.mkdir(training_dir+'/misclassified')
 	model.train()
-	optimizer = optim.Adam(model.parameters(), lr=0.00007, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
+	optimizer = optim.Adam(model.parameters(), lr=0.00004, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
 	loss = nn.CrossEntropyLoss().cuda()
 	train_loader = get_loader(loader='train')
 	epoch = 0

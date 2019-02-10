@@ -172,7 +172,7 @@ def save_images(album, file_name, experiment_path):
     inp *= 255
     a = np.uint8(np.clip(inp, 0, 255))
     for img in a:
-            PIL.Image.fromarray(img).save(experiment_path+"/{}".format(file_name), "jpg")
+            PIL.Image.fromarray(img).save(experiment_path+"/{}".format(file_name), "jpeg")
             file_name=file_name+1
 
 
