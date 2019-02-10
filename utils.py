@@ -24,6 +24,8 @@ import random
 import glob
 import shutil
 import io
+import numpy as np
+import PIL.Image
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--data-dir', default='./', type=str, help='Specify path to folder containing images')
@@ -161,6 +163,18 @@ def create_dir(name, parent=None):
 	full_path = './'+name
 	os.mkdir(full_path)
 	return full_path
+
+def save_images(album, file_name, experiment_path):
+    mean = np.tile(np.array([0.485, 0.456, 0.406]).reshape([1, 1, 1, 3]), [album.shape[0],1,1,1])
+    std = np.tile(np.array([0.229, 0.224, 0.225]).reshape([1, 1, 1, 3]), [album.shape[0],1,1,1])
+    inp = album.transpose(0, 2, 3, 1)
+    inp = std * inp + mean
+    inp *= 255
+    a = np.uint8(np.clip(inp, 0, 255))
+    for img in a:
+            PIL.Image.fromarray(img).save(experiment_path+"/{}".format(file_name), "jpg")
+            file_name=file_name+1
+
 
 
 if __name__ == '__main__':

@@ -9,14 +9,15 @@ import torch.nn as nn
 from model import Model
 import matplotlib.pyplot as plt
 import hyperparameters as hyp
-
+from utils import save_images
 
 def train(model):
 	print("Training...")
 	training_dir = "./training_ResNet{}_{}".format(hyp.DEPTH, time.time())
 	os.mkdir(training_dir)
+	os.mkdir(training_dir+'/misclassified')
 	model.train()
-	optimizer = optim.Adam(model.parameters(), lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
+	optimizer = optim.Adam(model.parameters(), lr=0.00007, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
 	loss = nn.CrossEntropyLoss().cuda()
 	train_loader = get_loader(loader='train')
 	epoch = 0
@@ -46,11 +47,14 @@ def train(model):
 			store_batch_loss_val = []
 			store_batch_acc_val = []
 			val_loader = get_loader(loader='val')
+			misclassified_images = []
 			for batch_num, (image, label) in enumerate(val_loader):
 				with torch.no_grad():
 					prediction = model.forward(image.cuda())
 				batch_loss = loss(prediction, label.cuda())
-				batch_acc = torch.abs(prediction.max(-1)[-1].squeeze().cpu()-label).float().mean()
+				misclassified = torch.abs(prediction.max(-1)[-1].squeeze().cpu()-label)
+				misclassified_images.append(image[misclassified==1])
+				batch_acc = misclassified.float().mean()
 				store_batch_loss_val.append(batch_loss.cpu())
 				store_batch_acc_val.append(batch_acc)
 				epoch_loss_val = torch.FloatTensor(store_batch_loss_val).mean()
@@ -63,6 +67,10 @@ def train(model):
 			plt.grid()
 			plt.savefig("{}/Loss.png".format(training_dir))
 			plt.close()
+			misclassified_images = np.concatenate(misclassified_images,axis=0)
+			validation_dir = training_dir+'/misclassified/checkpoint_{}'.format(epoch)
+			os.mkdir(validation_dir)
+			save_images(misclassified_images, 0, validation_dir)
 			model.train()
 		most_acc = max(store_epoch_acc_val)
 		print("\nHighest accuracy of {} occured at {}%...".format(most_acc, store_epoch_acc_val.index(most_acc)+1))
