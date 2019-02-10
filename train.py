@@ -24,7 +24,7 @@ def train(model):
 	store_epoch_loss_val = []
 	store_epoch_acc_val = []
 	try:
-		for e in tqdm(range(100)):
+		for e in tqdm(range(hyp.EPOCHS)):
 			epoch = e + 1
 			epoch_loss = 0
 			store_batch_loss = []
@@ -45,6 +45,7 @@ def train(model):
 			epoch_acc_val = 0
 			store_batch_loss_val = []
 			store_batch_acc_val = []
+			val_loader = get_loaders(loader='val')
 			for batch_num, (image, label) in enumerate(val_loader):
 				with torch.no_grad():
 					prediction = model.forward(image.cuda())
