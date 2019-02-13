@@ -2,6 +2,7 @@ import sys
 import os
 import numpy as np
 from skimage import io
+from utils import merge_files, shuffle_lines
 from PIL import Image
 import hyperparameters as hyp
 import torch.nn as nn
@@ -10,7 +11,7 @@ import torch.utils.data as data
 
 
 class nightmareDataset(data.Dataset):
-    def __init__(self, txtfile='train.txt', isTrain=True, isTest=False):
+    def __init__(self, file_path = 'data_files', grades=['A'], isTrain=True, isTest=False):
         self.normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
         self.toTensor = transforms.ToTensor()
@@ -31,10 +32,23 @@ class nightmareDataset(data.Dataset):
 
         self.isTest = isTest
         self.isTrain = isTrain
-        lines = open(txtfile).readlines()
+
+        self.grades = grades
+
         if not self.isTest:
-            self.txtfile = [line.strip('\n').split(',') for line in lines]
+            if self.isTrain:
+                string='train'
+            else:
+                string='val'
+            file_list = []
+            for grade in self.grades:
+                file_list.append(os.path.join(file_path, string+grade+'.txt'))
+                merge_files(file_list, os.path.join(file_path, string+'.txt'))
+                shuffle_lines(os.path.join(file_path, string+'.txt'))
+                lines = open(os.path.join(file_path, string+'.txt'))
+                self.txtfile = [line.strip('\n').split(',') for line in lines]
         else:
+            lines = open(os.path.join(file_path, 'test.txt'))
             self.txtfile = [line.strip('\n') for line in lines]
 
 
@@ -78,15 +92,15 @@ class nightmareDataset(data.Dataset):
             label = 0
         return im, label
 
-def get_loader(loader):
+def get_loader(loader, grades=None):
     if loader == 'train':
-        dataset = nightmareDataset(txtfile='train.txt', isTrain=True)
+        dataset = nightmareDataset(grades=grades, isTrain=True)
         dataloader = data.DataLoader(dataset, shuffle=True, batch_size=48//(hyp.DEPTH//50), pin_memory=True)
     elif loader == 'val':
-        dataset = nightmareDataset(txtfile='val.txt', isTrain=False)
+        dataset = nightmareDataset(grades=grades, isTrain=False)
         dataloader = data.DataLoader(dataset, shuffle=False, batch_size=48//(hyp.DEPTH//50), pin_memory=True)
     elif loader == 'test':
-        dataset = nightmareDataset(txtfile='test.txt', isTrain=False, isTest=True)
+        dataset = nightmareDataset(isTrain=False, isTest=True)
         dataloader = data.DataLoader(dataset, shuffle=False, batch_size=48//(hyp.DEPTH//50), pin_memory=True)
 
     return dataloader

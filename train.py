@@ -19,7 +19,7 @@ def train(model):
 	model.train()
 	optimizer = optim.Adam(model.parameters(), lr=0.00004, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
 	loss = nn.CrossEntropyLoss().cuda()
-	train_loader = get_loader(loader='train')
+	train_loader = get_loader(loader='train', grades=hyp.GRADES)
 	epoch = 0
 	store_epoch_loss = []
 	store_epoch_loss_val = []
@@ -46,7 +46,7 @@ def train(model):
 			epoch_acc_val = 0
 			store_batch_loss_val = []
 			store_batch_acc_val = []
-			val_loader = get_loader(loader='val')
+			val_loader = get_loader(loader='val', grades=hyp.GRADES)
 			misclassified_images = []
 			for batch_num, (image, label) in enumerate(val_loader):
 				with torch.no_grad():

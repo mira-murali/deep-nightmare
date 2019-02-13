@@ -35,7 +35,7 @@ def trip(trained_model=None):
 		for itr in range(1,hyp.ITERATIONS//10+1):
 			os.mkdir(octave_path+"/iteration_{}".format(itr*10))
 	test_loader = get_loader(loader="test")
-	
+
 
 
 

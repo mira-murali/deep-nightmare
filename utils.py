@@ -10,6 +10,8 @@ images/
     Class A Non-Nightmare/
     Class B Nightmare/
     Class B Non-Nightmare/
+    Class C Nightmare/
+    Class C Non-Nightmare/
     Final Testing Images/
 
 Please ensure that the path you send to data-dir includes the parent directory of the five folders
@@ -28,19 +30,51 @@ import numpy as np
 import PIL.Image
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--data-dir', default='./', type=str, help='Specify path to folder containing images')
+parser.add_argument('--data-dir', default='./images', type=str, help='Specify path to folder containing images')
 args = parser.parse_args()
 
 os.environ['CURRENT'] = os.getcwd()
+if not os.path.isdir(os.path.join(os.environ['CURRENT'], 'data_files')):
+    os.mkdir(os.path.join(os.environ['CURRENT'], 'data_files'))
+
 os.environ['DATA'] = ''
+os.environ['FILES'] = os.path.join(os.environ['CURRENT'], 'data_files')
+
+def merge_files(file_list, new_file_name):
+    out = open(new_file_name, 'w')
+    for file in file_list:
+        lines = open(file)
+        for line in lines:
+            out.write(line)
+
+def remove_files(file_list):
+    for file in file_list:
+        os.remove(file)
+
+def find_current_dirname(string):
+    reverse_string = string[-1::-1]
+    return reverse_string.find('/')
+
+def shuffle_lines(file_name):
+    with open(file_name, 'r') as file:
+        file_data = [(random.random(), line) for line in file]
+    file_data.sort()
+    with open('temp.txt', 'w') as temp:
+        for _, line in file_data:
+            temp.write(line)
+    os.rename('temp.txt', file_name)
 
 def modify_folder():
     '''
     function to rename the folders of the images and move it to a new folder data which has the following structure:
     data/
         train/
-            nightmare/
-            notnightmare/
+            NightmareA/
+            NightmareB/
+            NightmareC/
+            Non-NightmareA/
+            Non-NightmareB/
+            Non-NightmareC/
         test/
     '''
     if os.path.isdir(os.path.join(os.environ['CURRENT'], 'data')):
@@ -53,35 +87,59 @@ def modify_folder():
     if not os.path.isdir(os.path.join(os.environ['DATA'], 'train')):
         os.mkdir(os.path.join(os.environ['DATA'], 'train'))
 
+    grades = []
     for dir in dirs:
-        if 'Class A Nightmare' in dir:
+        if 'Final Testing Images' not in dir:
+            last_slash = find_current_dirname(dir)
+            split_words = dir[-last_slash:].split(' ')
             src = dir
-            shutil.copytree(src, os.path.join(os.environ['DATA'], 'train', 'nightmare'))
-        elif 'Class A Non-Nightmare' in dir:
-            src = dir
-            shutil.copytree(src, os.path.join(os.environ['DATA'], 'train', 'notnightmare'))
-        elif 'Final Testing Images' in dir:
+            label = split_words[2]
+            grade = split_words[1]
+            grades.append(grade)
+            shutil.copytree(src, os.path.join(os.environ['DATA'], 'train', label+grade))
+        else:
             src = dir
             shutil.copytree(src, os.path.join(os.environ['DATA'], 'test'))
+    grades = set(grades)
+    return grades
 
-def writePathToFile():
+def writePathToFile(grades):
     '''
     function to rename the images in both train and test folders and write the paths into train, val, and test txt files
     '''
 
-    all_file = open(os.path.join(os.environ['CURRENT'], 'all_data.txt'), 'w')
-    train_file = open(os.path.join(os.environ['CURRENT'], 'train.txt'), 'w')
-    val_file = open(os.path.join(os.environ['CURRENT'], 'val.txt'), 'w')
-    test_file = open(os.path.join(os.environ['CURRENT'], 'test.txt'), 'w')
+    all_file = open(os.path.join(os.environ['FILES'], 'all_data.txt'), 'w')
+    train_files = {}
+    val_files = {}
+
+    for grade in grades:
+        train_files[(grade, '1')] = os.path.join(os.environ['CURRENT'], 'train'+grade+'1.txt')
+        train_files[(grade, '0')] = os.path.join(os.environ['CURRENT'], 'train'+grade+'0.txt')
+        val_files[(grade, '1')] = os.path.join(os.environ['CURRENT'], 'val'+grade+'1.txt')
+        val_files[(grade, '0')] = os.path.join(os.environ['CURRENT'], 'val'+grade+'0.txt')
+
+    test_file = open(os.path.join(os.environ['FILES'], 'test.txt'), 'w')
 
     directories = glob.glob(os.path.join(os.environ['DATA'], 'train/*'))
 
+    train_file = ''
+    val_file = ''
     for dir in directories:
         images = glob.glob(os.path.join(dir, '*'))
         images.sort()
-        label = ""
+        if 'Non-' in dir:
+            label = '0'
+        else:
+            label = '1'
         line = 1
         count = 1
+        split_word = dir[-1]
+        for grade in grades:
+            if grade == split_word:
+                train_file = open(train_files[(grade, label)], 'w')
+                val_file = open(val_files[(grade, label)], 'w')
+                break
+
         for image in images:
             src = image
             name, ext = os.path.splitext(image)
@@ -90,13 +148,7 @@ def writePathToFile():
                 count += 1
                 dst = os.path.join(dir, str(count)+ext)
             os.rename(src, dst)
-            if dst.find('/nightmare') < 0:
-                all_file.write(dst+','+str(0))
-                label = str(0)
-            else:
-                all_file.write(dst+','+str(1))
-                label = str(1)
-            all_file.write('\n')
+            all_file.write(dst+','+label+'\n')
             if (line%5)==0:
                 val_file.write(dst+','+label+'\n')
             else:
@@ -105,31 +157,28 @@ def writePathToFile():
             line += 1
             count += 1
 
+        train_file.close()
+        val_file.close()
+
 
     all_file.close()
-    val_file.close()
-    train_file.close()
-    with open('train.txt', 'r') as train:
-        train_data = [(random.random(), line) for line in train]
-    with open('val.txt', 'r') as val:
-        val_data = [(random.random(), line) for line in val]
 
-    train_data.sort()
-    val_data.sort()
-    with open('trainlist.txt', 'w') as new_train:
-        for _, line in train_data:
-            new_train.write(line)
-    with open('vallist.txt', 'w') as new_val:
-        for _, line in val_data:
-            new_val.write(line)
+    for grade in grades:
 
-    os.rename('trainlist.txt', 'train.txt')
-    os.rename('vallist.txt', 'val.txt')
+        train_list = [train_files[(grade, '0')], train_files[(grade, '1')]]
+        val_list = [val_files[(grade, '0')], val_files[(grade, '1')]]
 
-    train.close()
-    val.close()
-    new_train.close()
-    new_val.close()
+        train_name = os.path.join(os.environ['FILES'], 'train'+grade+'.txt')
+        val_name = os.path.join(os.environ['FILES'], 'val'+grade+'.txt')
+
+        merge_files(file_list=train_list, new_file_name=train_name)
+        merge_files(file_list=train_list, new_file_name=val_name)
+
+        remove_files(file_list=train_list)
+        remove_files(file_list=val_list)
+
+        shuffle_lines(train_name)
+        shuffle_lines(val_name)
 
     count = 1
     test_images = glob.glob(os.path.join(os.environ['DATA'], 'test/*'))
@@ -178,5 +227,5 @@ def save_images(album, file_name, experiment_path):
 
 
 if __name__ == '__main__':
-    modify_folder()
-    writePathToFile()
+    grades = modify_folder()
+    writePathToFile(grades)
