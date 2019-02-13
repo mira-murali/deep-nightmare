@@ -13,7 +13,7 @@ from utils import save_images
 
 def train(model):
 	print("Training...")
-	training_dir = "./training_ResNet{}_{}".format(hyp.DEPTH, time.time())
+	training_dir = "./training_{}_ResNet{}_{}".format(str(hyp.GRADES), hyp.DEPTH, time.time())
 	os.mkdir(training_dir)
 	os.mkdir(training_dir+'/misclassified')
 	model.train()
@@ -73,12 +73,14 @@ def train(model):
 			save_images(misclassified_images, 0, None, validation_dir)
 			model.train()
 		most_acc = max(store_epoch_acc_val)
-		print("\nHighest accuracy of {} occured at {}%...".format(most_acc, store_epoch_acc_val.index(most_acc)+1))
+		min_loss = min(store_epoch_loss_val)
+		print("\nHighest accuracy of {} occured at {}%...Minimum loss occured at {}%...".format(most_acc, store_epoch_acc_val.index(most_acc)+1, store_epoch_loss_val.index(min_loss)+1))
 		user_pick = input("Which checkpoint do you want to use ?\n")
 		model.load_state_dict(torch.load("{}/checkpoint_{}.pth".format(training_dir, user_pick)))
 	except KeyboardInterrupt:
 		most_acc = max(store_epoch_acc_val)
-		print("\nHighest accuracy of {} occured at {}...".format(most_acc, store_epoch_acc_val.index(most_acc)+1))
+		min_loss = min(store_epoch_loss_val)
+		print("\nHighest accuracy of {} occured at {}%...Minimum loss occured at {}%...".format(most_acc, store_epoch_acc_val.index(most_acc)+1, store_epoch_loss_val.index(min_loss)+1))
 		user_pick = input("Which checkpoint do you want to use ?\n")
 		model.load_state_dict(torch.load("{}/checkpoint_{}.pth".format(training_dir, user_pick)))
 

@@ -39,10 +39,12 @@ class Model(nn.Module):
 		layers = [self.base_model.layer1, self.base_model.layer2, self.base_model.layer3, self.base_model.layer4]
 		for i in range(end_layer):
 			x = layers[i](x)
-		extracted_features = layers[-1](x)
-		output = self.classification_layer(extracted_features)
+		"""
+		with torch.no_grad():
+			output = self.forward(input_image)
 		return x, output.max(-1)[-1]
-
+		"""
+		return x, None
 
 	def train(self):
 		self.base_model.train()
