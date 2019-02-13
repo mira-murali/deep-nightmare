@@ -39,7 +39,9 @@ class Model(nn.Module):
 		layers = [self.base_model.layer1, self.base_model.layer2, self.base_model.layer3, self.base_model.layer4]
 		for i in range(end_layer):
 			x = layers[i](x)
-		return x
+		extracted_features = layers[-1](x)
+		output = self.classification_layer(extracted_features)
+		return x, output.max(-1)[-1]
 
 
 	def train(self):

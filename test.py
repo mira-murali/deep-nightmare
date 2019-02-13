@@ -43,7 +43,7 @@ def trip(trained_model=None):
 	for image,__ in tqdm(test_loader):
 		octave_stack=[]
 		for OCTAVES in hyp.OCTAVES:
-			iteration_stack = dream(trained_model,
+			iteration_stack, classification = dream(trained_model,
 									image.numpy(),
 									file_name,
 									experiment_path+"/octave_{}".format(OCTAVES),
@@ -53,7 +53,7 @@ def trip(trained_model=None):
 									distance=objective_L2)
 			octave_stack.append(np.concatenate(iteration_stack, axis=3))
 		album = np.concatenate((np.tile(image.numpy(),[1,1,len(hyp.OCTAVES),1]),np.concatenate(octave_stack, axis=2)), axis=3)
-		save_images(album, file_name, experiment_path)
+		save_images(album, file_name, classification, experiment_path)
 		file_name=file_name+image.shape[0]
 
 

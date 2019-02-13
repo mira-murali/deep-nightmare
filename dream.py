@@ -51,7 +51,7 @@ def make_step(base_img, img, model, file_name, experiment_path, control=None, di
         else:
             img_variable = Variable(img_tensor, requires_grad=True)
 
-        act_value = model.resnet(img_variable, hyp.END_LAYER)
+        act_value, classification = model.resnet(img_variable, hyp.END_LAYER)
         diff_out = distance(act_value, guide_features)
         act_value.backward(diff_out)
         ratio = np.abs(img_variable.grad.data.cpu().numpy()).mean()
@@ -67,7 +67,7 @@ def make_step(base_img, img, model, file_name, experiment_path, control=None, di
                 showtensor(np.concatenate((base_img,img),axis=3), file_name, i+1, experiment_path)
             else:
                 showtensor(img, file_name, i+1, experiment_path)
-    return img, iteration_stack
+    return img, iteration_stack, classification
 
 
 def dream(model,
@@ -95,6 +95,6 @@ def dream(model,
                 detail, (1, 1, 1.0 * h / h1, 1.0 * w / w1), order=1)
 
         input_oct = octave_base + detail
-        out, iteration_stack = make_step(base_img, input_oct, model, file_name, experiment_path, control, distance=distance)
+        out, iteration_stack, classification = make_step(base_img, input_oct, model, file_name, experiment_path, control, distance=distance)
         detail = out - octave_base
-    return iteration_stack
+    return iteration_stack, classification

@@ -70,7 +70,7 @@ def train(model):
 			misclassified_images = np.concatenate(misclassified_images,axis=0)
 			validation_dir = training_dir+'/misclassified/checkpoint_{}'.format(epoch)
 			os.mkdir(validation_dir)
-			save_images(misclassified_images, 0, validation_dir)
+			save_images(misclassified_images, 0, None, validation_dir)
 			model.train()
 		most_acc = max(store_epoch_acc_val)
 		print("\nHighest accuracy of {} occured at {}%...".format(most_acc, store_epoch_acc_val.index(most_acc)+1))
