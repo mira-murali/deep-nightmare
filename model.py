@@ -7,14 +7,15 @@ class Model(nn.Module):
 	def __init__(self):
 		super().__init__()
 		if hyp.DEPTH==50:
-			self.base_model = models.resnet50(pretrained=True)
+			self.base_model = models.resnet50(pretrained=hyp.pretrained)
 		else:
 			if hyp.DEPTH==100:
-				self.base_model = models.resnet101(pretrained=True)
+				self.base_model = models.resnet101(pretrained=hyp.pretrained)
 			else:
 				if hyp.DEPTH==150:
-					self.base_model = models.resnet152(pretrained=True)
-		self.classification_layer = nn.Sequential(	nn.ReLU(), nn.Linear(1000,500), nn.ReLU(),  nn.Linear(500,2))
+					self.base_model = models.resnet152(pretrained=hyp.pretrained)
+#		self.classification_layer = nn.Sequential(	nn.ReLU(), nn.Linear(1000,500), nn.ReLU(),  nn.Linear(500,2))
+		self.classification_layer = nn.Sequential(	nn.ReLU(), nn.Linear(1000,2))
 
 	def forward(self, input_image):
 		"""
