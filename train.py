@@ -19,7 +19,7 @@ def train(model):
 	model.train()
 	optimizer = optim.Adam(model.parameters(), lr=hyp.LR, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
 	loss = nn.CrossEntropyLoss().cuda()
-	train_loader = get_loader(loader='train', grades=hyp.GRADES)
+	train_loader = get_loader(loader='train', grades=hyp.GRADES, jitter=hyp.JITTER)
 	epoch = 0
 	store_epoch_loss = []
 	store_epoch_loss_val = []

@@ -5,4 +5,5 @@ ITERATIONS=40
 OCTAVES=[3,5,7,9]
 GRADES = ['A','B']
 pretrained = False
+JITTER = False
 LR = 0.00004

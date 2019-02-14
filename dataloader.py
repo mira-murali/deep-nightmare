@@ -11,7 +11,7 @@ import torch.utils.data as data
 
 
 class nightmareDataset(data.Dataset):
-    def __init__(self, file_path = 'data_files', grades=['A'], isTrain=True, isTest=False):
+    def __init__(self, file_path = 'data_files', grades=['A'], jitter = False, isTrain=True, isTest=False):
         self.normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
         self.toTensor = transforms.ToTensor()
@@ -28,7 +28,11 @@ class nightmareDataset(data.Dataset):
          self.toTensor, self.normalize])
 
         self.norm = transforms.Compose([transforms.Resize(224), self.toTensor, self.normalize])
-        self.transform = [self.hRotation, self.vRotation, self.randomCrop, self.lighten, self.norm]
+        if jitter:
+
+            self.transform = [self.hRotation, self.vRotation, self.randomCrop, self.lighten, self.norm]
+        else:
+            self.transform = [self.hRotation, self.vRotation, self.randomCrop, self.norm]
 
         self.isTest = isTest
         self.isTrain = isTrain
@@ -92,9 +96,9 @@ class nightmareDataset(data.Dataset):
             label = 0
         return im, label
 
-def get_loader(loader, grades=None):
+def get_loader(loader, grades=None, jitter=False):
     if loader == 'train':
-        dataset = nightmareDataset(grades=grades, isTrain=True)
+        dataset = nightmareDataset(grades=grades, jitter=False, isTrain=True)
         dataloader = data.DataLoader(dataset, shuffle=True, batch_size=48//(hyp.DEPTH//50), pin_memory=True)
     elif loader == 'val':
         dataset = nightmareDataset(grades=grades, isTrain=False)
