@@ -99,12 +99,12 @@ class nightmareDataset(data.Dataset):
 def get_loader(loader, grades=None, jitter=False):
     if loader == 'train':
         dataset = nightmareDataset(grades=grades, jitter=False, isTrain=True)
-        dataloader = data.DataLoader(dataset, shuffle=True, batch_size=48//(hyp.DEPTH//50), pin_memory=True)
+        dataloader = data.DataLoader(dataset, shuffle=True, batch_size=int(48//(hyp.DEPTH//20)*2), pin_memory=True)
     elif loader == 'val':
         dataset = nightmareDataset(grades=grades, isTrain=False)
-        dataloader = data.DataLoader(dataset, shuffle=False, batch_size=48//(hyp.DEPTH//50), pin_memory=True)
+        dataloader = data.DataLoader(dataset, shuffle=False, batch_size=int(48//(hyp.DEPTH//20)*2), pin_memory=True)
     elif loader == 'test':
         dataset = nightmareDataset(isTrain=False, isTest=True)
-        dataloader = data.DataLoader(dataset, shuffle=False, batch_size=48//(hyp.DEPTH//50), pin_memory=True)
+        dataloader = data.DataLoader(dataset, shuffle=False, batch_size=int(48//(hyp.DEPTH//20)*2), pin_memory=True)
 
     return dataloader
