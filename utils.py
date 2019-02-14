@@ -29,9 +29,6 @@ import io
 import numpy as np
 import PIL.Image
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--data-dir', default='./images', type=str, help='Specify path to folder containing images')
-args = parser.parse_args()
 
 os.environ['CURRENT'] = os.getcwd()
 if not os.path.isdir(os.path.join(os.environ['CURRENT'], 'data_files')):
@@ -230,5 +227,8 @@ def save_images(album, file_name, classification, experiment_path):
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--data-dir', default='./images', type=str, help='Specify path to folder containing images')
+    args = parser.parse_args()
     grades = modify_folder()
     writePathToFile(grades)
