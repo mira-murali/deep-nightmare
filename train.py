@@ -11,9 +11,13 @@ import matplotlib.pyplot as plt
 import hyperparameters as hyp
 from utils import save_images
 from functools import partial
+import test
+from threading import Timer
 
-
-#def interrupt_handler():
+def interrupt_handler(trained_model):
+	print("User input timed-out ! Using min loss...")
+	test.trip(trained_model)
+	print("Experiment generated ! Would you like to do another checkpoint? ")
 
 def train(model):
 	print("Training...")
@@ -79,10 +83,10 @@ def train(model):
 		most_acc = max(store_epoch_acc_val)
 		min_loss = min(store_epoch_loss_val)
 		print("\nHighest accuracy of {} occured at {}%...Minimum loss occured at {}%...".format(most_acc, store_epoch_acc_val.index(most_acc)+1, store_epoch_loss_val.index(min_loss)+1))
-#		signal.signal(signal.SIGALRM, partial(interrupt_handler, "{}/checkpoint_{}.pth".format(training_dir, min_loss)))
-#		signal.alarm(60*5)
+		t = Timer(3*60, interrupt_handler, ["{}/checkpoint_{}.pth".format(training_dir, store_epoch_loss_val.index(min_loss)+1)])
+		t.start()
 		user_pick = input("Which checkpoint do you want to use ?\n")
-#		signal.alarm(0)
+		t.cancel()
 		model.load_state_dict(torch.load("{}/checkpoint_{}.pth".format(training_dir, user_pick)))
 	except KeyboardInterrupt:
 		most_acc = max(store_epoch_acc_val)
