@@ -47,10 +47,10 @@ class nightmareDataset(data.Dataset):
             file_list = []
             for grade in self.grades:
                 file_list.append(os.path.join(file_path, string+grade+'.txt'))
-                merge_files(file_list, os.path.join(file_path, string+'.txt'))
-                shuffle_lines(os.path.join(file_path, string+'.txt'))
-                lines = open(os.path.join(file_path, string+'.txt'))
-                self.txtfile = [line.strip('\n').split(',') for line in lines]
+            merge_files(file_list, os.path.join(file_path, string+'.txt'))
+            shuffle_lines(os.path.join(file_path, string+'.txt'))
+            lines = open(os.path.join(file_path, string+'.txt'))
+            self.txtfile = [line.strip('\n').split(',') for line in lines]
         else:
             lines = open(os.path.join(file_path, 'test.txt'))
             self.txtfile = [line.strip('\n') for line in lines]
@@ -108,3 +108,7 @@ def get_loader(loader, grades=None, jitter=False):
         dataloader = data.DataLoader(dataset, shuffle=False, batch_size=int(48//(hyp.DEPTH//20)*2), pin_memory=True)
 
     return dataloader
+
+if __name__ == '__main__':
+    dataloader = get_loader('train', grades=['A', 'B'])
+    dataloader = get_loader('val', grades=['A', 'B'])

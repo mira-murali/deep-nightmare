@@ -39,14 +39,14 @@ os.environ['FILES'] = os.path.join(os.environ['CURRENT'], 'data_files')
 
 def merge_files(file_list, new_file_name):
     out = open(new_file_name, 'w')
-    for file in file_list:
-        lines = open(file)
+    for doc in file_list:
+        lines = open(doc)
         for line in lines:
             out.write(line)
 
 def remove_files(file_list):
-    for file in file_list:
-        os.remove(file)
+    for doc in file_list:
+        os.remove(doc)
 
 def find_current_dirname(string):
     reverse_string = string[-1::-1]
@@ -131,11 +131,8 @@ def writePathToFile(grades):
         line = 1
         count = 1
         split_word = dir[-1]
-        for grade in grades:
-            if grade == split_word:
-                train_file = open(train_files[(grade, label)], 'w')
-                val_file = open(val_files[(grade, label)], 'w')
-                break
+        train_file = open(train_files[(split_word, label)], 'w')
+        val_file = open(val_files[(split_word, label)], 'w')
 
         for image in images:
             src = image
@@ -169,7 +166,7 @@ def writePathToFile(grades):
         val_name = os.path.join(os.environ['FILES'], 'val'+grade+'.txt')
 
         merge_files(file_list=train_list, new_file_name=train_name)
-        merge_files(file_list=train_list, new_file_name=val_name)
+        merge_files(file_list=val_list, new_file_name=val_name)
 
         remove_files(file_list=train_list)
         remove_files(file_list=val_list)
