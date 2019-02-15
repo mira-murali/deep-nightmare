@@ -108,7 +108,3 @@ def get_loader(loader, grades=None, jitter=False):
         dataloader = data.DataLoader(dataset, shuffle=False, batch_size=int(48//(hyp.DEPTH//20)*2), pin_memory=True)
 
     return dataloader
-
-if __name__ == '__main__':
-    dataloader = get_loader('train', grades=['A', 'B'])
-    dataloader = get_loader('val', grades=['A', 'B'])

@@ -15,7 +15,7 @@ def showarray(a, file_name, iterations, experiment_path, fmt='jpeg'):
         if img.shape[0]==224:
             PIL.Image.fromarray(img).save(experiment_path+"/iteration_{}/{}".format(iterations, file_name), fmt)
             file_name=file_name+1
-    
+
 
 def showtensor(a, file_name, iterations, experiment_path):
     mean = np.tile(np.array([0.485, 0.456, 0.406]).reshape([1, 1, 1, 3]), [a.shape[0],1,1,1])
@@ -32,7 +32,7 @@ def objective_L2(dst, guide_features):
 def make_step(base_img, img, model, file_name, experiment_path, control=None, distance=objective_L2):
     mean = np.array([0.485, 0.456, 0.406]).reshape([3, 1, 1])
     std = np.array([0.229, 0.224, 0.225]).reshape([3, 1, 1])
-    
+
     learning_rate = 2e-2
     max_jitter = 32
     num_iterations = hyp.ITERATIONS
