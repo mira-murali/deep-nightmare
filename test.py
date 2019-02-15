@@ -1,6 +1,6 @@
 from dream import dream, objective_L2
 from model import Model
-from train import train
+import train
 import numpy as np
 from dataloader import get_loader
 import hyperparameters as hyp
@@ -14,7 +14,7 @@ from utils import save_images
 
 def trip(trained_model=None):
 	if trained_model is None:
-		trained_model, training_dir = train(Model().cuda())
+		trained_model, training_dir = train.train(Model().cuda())
 		training_dir = training_dir+'/'
 	else:
 		path_to_model = trained_model

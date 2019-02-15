@@ -1,9 +1,9 @@
 DEPTH=20
 END_LAYER = 3
-EPOCHS = 200
+EPOCHS = 500
 ITERATIONS=40
 OCTAVES=[3,5,7,9]
-GRADES = ['A','B', 'C']
+GRADES = ['A','B','C']
 pretrained = False
-JITTER = False
-LR = 5e-3
+JITTER = True
+LR = 0.00008
