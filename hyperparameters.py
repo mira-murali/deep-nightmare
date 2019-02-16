@@ -7,3 +7,4 @@ GRADES = ['A','B','C']
 pretrained = False
 JITTER = True
 LR = 0.00008
+ANIMALS = True

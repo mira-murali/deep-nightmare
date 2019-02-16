@@ -37,6 +37,37 @@ if not os.path.isdir(os.path.join(os.environ['CURRENT'], 'data_files')):
 os.environ['DATA'] = ''
 os.environ['FILES'] = os.path.join(os.environ['CURRENT'], 'data_files')
 
+def write_data(dir, file_name):
+    dir_name = os.path.abspath(dir)
+    labels = glob.glob(os.path.join(dir_name, '*'))
+    all_file = open(os.path.join(os.environ['FILES'], file_name), 'w')
+    class_to_label = {}
+    count = 0
+    for label in labels:
+        class_to_label[label] = str(count)
+        images = glob.glob(os.path.join(label, '*'))
+        for image in images:
+            all_file.write(image+','+class_to_label[label]+'\n')
+        count += 1
+    all_file.close()
+
+def split_data(file_name, shuffle=True):
+    if shuffle:
+        shuffle_lines(file_name)
+    last_slash = find_current_dirname(file_name)
+    train_file = open(os.path.join(file_name[:-last_slash-1], 'train_animals.txt'), 'w')
+    val_file = open(os.path.join(file_name[:-last_slash-1], 'val_animals.txt'), 'w')
+    counter = 0
+    with open(file_name) as src_file:
+        f = src_file.readlines()
+        counter = 0
+        for line in f:
+            if counter <= int(0.8*len(f)):
+                train_file.write(line)
+            else:
+                val_file.write(line)
+            counter += 1
+
 def merge_files(file_list, new_file_name):
     out = open(new_file_name, 'w')
     for doc in file_list:
@@ -225,7 +256,11 @@ def save_images(album, file_name, classification, experiment_path):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--data-dir', default='./images', type=str, help='Specify path to folder containing images')
+    parser.add_argument('--data-dir', default='data/train/', type=str, help='Specify path to folder containing images')
     args = parser.parse_args()
+    '''
     grades = modify_folder()
     writePathToFile(grades)
+    '''
+    write_data(args.data_dir, file_name = 'all_animals.txt')
+    split_data(os.path.join(os.environ['FILES'], 'all_animals.txt'), shuffle=True)

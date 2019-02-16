@@ -11,7 +11,7 @@ import torch.utils.data as data
 
 
 class nightmareDataset(data.Dataset):
-    def __init__(self, file_path = 'data_files', grades=['A'], jitter = False, isTrain=True, isTest=False):
+    def __init__(self, file_path = 'data_files', grades=['A'], jitter = False, isTrain=True, isTest=False, animals=True):
         self.normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
         self.toTensor = transforms.ToTensor()
@@ -38,19 +38,24 @@ class nightmareDataset(data.Dataset):
         self.isTrain = isTrain
 
         self.grades = grades
+        self.animals = animals
 
+        if self.isTrain:
+            string='train'
+        else:
+            string='val'
         if not self.isTest:
-            if self.isTrain:
-                string='train'
+            if not self.animals:
+                file_list = []
+                for grade in self.grades:
+                    file_list.append(os.path.join(file_path, string+grade+'.txt'))
+                merge_files(file_list, os.path.join(file_path, string+'.txt'))
+                shuffle_lines(os.path.join(file_path, string+'.txt'))
+                lines = open(os.path.join(file_path, string+'.txt'))
+                self.txtfile = [line.strip('\n').split(',') for line in lines]
             else:
-                string='val'
-            file_list = []
-            for grade in self.grades:
-                file_list.append(os.path.join(file_path, string+grade+'.txt'))
-            merge_files(file_list, os.path.join(file_path, string+'.txt'))
-            shuffle_lines(os.path.join(file_path, string+'.txt'))
-            lines = open(os.path.join(file_path, string+'.txt'))
-            self.txtfile = [line.strip('\n').split(',') for line in lines]
+                lines = open(os.path.join(file_path, string+'_animals.txt'))
+                self.txtfile = [line.strip('\n').split(',') for line in lines]
         else:
             lines = open(os.path.join(file_path, 'test.txt'))
             self.txtfile = [line.strip('\n') for line in lines]
@@ -96,12 +101,12 @@ class nightmareDataset(data.Dataset):
             label = 0
         return im, label
 
-def get_loader(loader, grades=None, jitter=False):
+def get_loader(loader, grades=None, jitter=False, animals=True):
     if loader == 'train':
-        dataset = nightmareDataset(grades=grades, jitter=False, isTrain=True)
+        dataset = nightmareDataset(grades=grades, jitter=False, isTrain=True, animals=animals)
         dataloader = data.DataLoader(dataset, shuffle=True, batch_size=int(48//(hyp.DEPTH//20)*2), pin_memory=True)
     elif loader == 'val':
-        dataset = nightmareDataset(grades=grades, isTrain=False)
+        dataset = nightmareDataset(grades=grades, isTrain=False, animals=animals)
         dataloader = data.DataLoader(dataset, shuffle=False, batch_size=int(48//(hyp.DEPTH//20)*2), pin_memory=True)
     elif loader == 'test':
         dataset = nightmareDataset(isTrain=False, isTest=True)
