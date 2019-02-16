@@ -17,7 +17,10 @@ class Model(nn.Module):
 		elif hyp.DEPTH == 150:
 			self.base_model = models.resnet152(pretrained=hyp.pretrained)
 #		self.classification_layer = nn.Sequential(	nn.ReLU(), nn.Linear(1000,500), nn.ReLU(),  nn.Linear(500,2))
-		self.classification_layer = nn.Sequential(	nn.ReLU(), nn.Linear(1000,2))
+		if hyp.ANIMALS is True:
+			self.classification_layer = nn.Sequential(	nn.ReLU(), nn.Linear(1000,11))
+		else:
+			self.classification_layer = nn.Sequential(	nn.ReLU(), nn.Linear(1000,2))
 
 	def forward(self, input_image):
 		"""

@@ -60,7 +60,7 @@ def train(model):
 				with torch.no_grad():
 					prediction = model.forward(image.cuda())
 				batch_loss = loss(prediction, label.cuda())
-				misclassified = torch.abs(prediction.max(-1)[-1].squeeze().cpu()-label)
+				misclassified = prediction.max(-1)[-1].squeeze().cpu() != label
 				misclassified_images.append(image[misclassified==1])
 				batch_acc = misclassified.float().mean()
 				store_batch_loss_val.append(batch_loss.cpu())
