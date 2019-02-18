@@ -69,6 +69,9 @@ class nightmareDataset(data.Dataset):
             im =Image.open(self.txtfile[idx][0]).convert('RGB')
         else:
             im =Image.open(self.txtfile[idx]).convert('RGB')
+        if self.animals:
+            w,h = im.size
+            im = im.crop((0,0,w,h-20))
         im = np.asarray(im, np.uint8)
         if len(im.shape) > 2 and im.shape[-1] > 3:
             im = im[:, :, :3]
