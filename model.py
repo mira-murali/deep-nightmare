@@ -18,7 +18,13 @@ class Model(nn.Module):
 			self.base_model = models.resnet152(pretrained=hyp.pretrained)
 #		self.classification_layer = nn.Sequential(	nn.ReLU(), nn.Linear(1000,500), nn.ReLU(),  nn.Linear(500,2))
 		if hyp.ANIMALS is True:
-			self.classification_layer = nn.Sequential(	nn.ReLU(), nn.Linear(1000,11))
+			try:
+				self.classification_layer = nn.Sequential(	nn.ReLU(), nn.Linear(1000,10))
+			except:
+				try:
+					self.classification_layer = nn.Sequential(	nn.ReLU(), nn.Linear(1000,11))
+				except:
+					self.classification_layer = nn.Sequential(	nn.ReLU(), nn.Linear(1000,12))
 		else:
 			self.classification_layer = nn.Sequential(	nn.ReLU(), nn.Linear(1000,2))
 
