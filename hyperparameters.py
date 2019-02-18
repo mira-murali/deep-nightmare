@@ -1,10 +1,10 @@
-DEPTH=20
+DEPTH=50
 END_LAYER = 3
-EPOCHS = 500
+EPOCHS = 300
 ITERATIONS=40
 OCTAVES=[3,5,7,9]
 GRADES = ['A','B','C']
-pretrained = False
-JITTER = True
-LR = 0.00008
+pretrained = True
+JITTER = False
+LR = 5e-4
 ANIMALS = True
