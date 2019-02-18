@@ -33,8 +33,10 @@ def train(model):
 	store_epoch_loss = []
 	store_epoch_loss_val = []
 	store_epoch_acc_val = []
+	scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[int(hyp.EPOCHS/2), int(0.75*hyp.EPOCHS)], gamma=0.1)
 	try:
 		for e in tqdm(range(hyp.EPOCHS)):
+			scheduler.step()
 			epoch = e + 1
 			epoch_loss = 0
 			store_batch_loss = []
@@ -76,10 +78,11 @@ def train(model):
 			plt.grid()
 			plt.savefig("{}/Loss.png".format(training_dir))
 			plt.close()
-			misclassified_images = np.concatenate(misclassified_images,axis=0)
-			validation_dir = training_dir+'/misclassified/checkpoint_{}'.format(epoch)
-			os.mkdir(validation_dir)
-			save_images(misclassified_images, 0, None, validation_dir)
+			if len(misclassified_images) > 0:
+				misclassified_images = np.concatenate(misclassified_images,axis=0)
+				validation_dir = training_dir+'/misclassified/checkpoint_{}'.format(epoch)
+				os.mkdir(validation_dir)
+				save_images(misclassified_images, 0, None, validation_dir)
 			model.train()
 		most_acc = max(store_epoch_acc_val)
 		min_loss = min(store_epoch_loss_val)
