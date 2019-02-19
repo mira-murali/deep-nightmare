@@ -2,7 +2,7 @@ import PIL.Image
 from io import BytesIO
 from IPython.display import clear_output, Image, display
 import numpy as np
-import torch, os, time
+import torch, os, time, sys
 import scipy.ndimage as nd
 from torch.autograd import Variable
 import hyperparameters as hyp
@@ -12,7 +12,7 @@ from tqdm import tqdm
 def showarray(a):
     a = np.uint8(np.clip(a, 0, 255))
     for img in a:
-        return PIL.Image.fromarray(img)
+        return img
 
 
 def showtensor(a):
@@ -22,12 +22,12 @@ def showtensor(a):
     inp = inp.transpose(0, 2, 3, 1)
     inp = std * inp + mean
     inp *= 255
-    showarray(inp)
+    return showarray(inp)
 
 def objective_L2(dst, guide_features):
     return dst.data
 
-def make_step(img, model, file_name, control=None, distance=objective_L2):
+def make_step(img, model, control=None, distance=objective_L2):
     mean = np.array([0.485, 0.456, 0.406]).reshape([3, 1, 1])
     std = np.array([0.229, 0.224, 0.225]).reshape([3, 1, 1])
 
@@ -58,6 +58,7 @@ def make_step(img, model, file_name, control=None, distance=objective_L2):
 
 
 def dream(model, base_img):
+    base_img = np.expand_dims(base_img.transpose(2,0,1), axis=0)
     octave_n    =   np.random.randint(3,9)
     octave_scale=   1.4
     control     =   None
@@ -79,6 +80,6 @@ def dream(model, base_img):
                 detail, (1, 1, 1.0 * h / h1, 1.0 * w / w1), order=1)
 
         input_oct = octave_base + detail
-        out = make_step(input_oct, model, file_name, control, distance=distance)
+        out = make_step(input_oct, model, control, distance=distance)
         detail = out - octave_base
     return showtensor(out)

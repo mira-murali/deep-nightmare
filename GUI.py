@@ -1,6 +1,8 @@
 import cv2
-import argparse
+import argparse, sys
 from speed_dream import dream
+from model import Model
+import torch
 
 def cropToFit(param):
     overlay_height, overlay_width, channels = overlay.shape
@@ -14,7 +16,7 @@ def cropToFit(param):
 def blend(event, x, y, flags, param): 
     bg = param[0]
     model = param[3]
-    step = 20 # decid how large each paint brush is
+    step = 112 # decid how large each paint brush is
 
     if event == cv2.EVENT_MOUSEMOVE:
         bg_height, bg_width, channels = bg.shape
@@ -24,16 +26,12 @@ def blend(event, x, y, flags, param):
         # assume returned "overlay" image has the same size of the img passed in
         param[1] = dream(model, bg[y1:y2, x1:x2])
         overlay = param[1]
-
         # make composite
-        if overlay != None:
-            composite = cv2.addWeighted(bg[y1:y2, x1:x2],
+        composite = cv2.addWeighted(bg[y1:y2, x1:x2],
                                         alpha1,
                                         overlay,
                                         1 - alpha1,
                                         0)
-        else:
-            print("Returned image by dream() is none.")
 
         bg[y1:y2, x1:x2] = composite
         param[0] = bg
@@ -56,10 +54,14 @@ args = parser.parse_args()
 p = cv2.imread(args.p, 1) # read images
 model = args.m
 bg, original = p.copy(), p.copy()
-param = [bg, None, original, model]
 alpha1 =0.9 # for blend
 alpha2 = 0.96 # for fadeOut
 # cropToFit(param) - not necessary
+mdl = Model()
+mdl.load_state_dict(torch.load(model))
+model = mdl.cuda()
+param = [bg, None, original, model]
+
 while True:
     cv2.namedWindow("Deep-Nightmare")
     cv2.setMouseCallback("Deep-Nightmare", blend, param)
