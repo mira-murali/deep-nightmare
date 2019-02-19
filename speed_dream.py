@@ -12,6 +12,7 @@ from tqdm import tqdm
 def showarray(a):
     a = np.uint8(np.clip(a, 0, 255))
     for img in a:
+        #PIL.Image.fromarray(img).save("{}.jpeg".format(time.time()),"jpeg")
         return img
 
 
@@ -33,7 +34,7 @@ def make_step(img, model, control=None, distance=objective_L2):
 
     learning_rate = 2e-2
     max_jitter = 32
-    num_iterations = np.random.randint(1,40)
+    num_iterations = np.random.randint(1,2)
     guide_features = control
 
     for i in range(num_iterations):
@@ -59,11 +60,12 @@ def make_step(img, model, control=None, distance=objective_L2):
 
 def dream(model, base_img):
     base_img = np.expand_dims(base_img.transpose(2,0,1), axis=0)
-    octave_n    =   np.random.randint(3,9)
+    octave_n    =   np.random.randint(3,4)
     octave_scale=   1.4
     control     =   None
     distance    =   objective_L2
     warnings.filterwarnings('ignore', '.*output shape of zoom.*')
+    warnings.filterwarnings('ignore', '.*resize.*')
     octaves = [base_img]
     for i in range(octave_n - 1):
         octaves.append(
@@ -82,4 +84,5 @@ def dream(model, base_img):
         input_oct = octave_base + detail
         out = make_step(input_oct, model, control, distance=distance)
         detail = out - octave_base
-    return showtensor(out)
+    output = showtensor(out)
+    return output
