@@ -1,5 +1,6 @@
 import cv2
 import argparse
+from speed_dream import dream
 
 def cropToFit(param):
     overlay_height, overlay_width, channels = overlay.shape
@@ -12,20 +13,28 @@ def cropToFit(param):
 
 def blend(event, x, y, flags, param): 
     bg = param[0]
-    overlay = param[1]
-    overlay_height, overlay_width, channels = overlay.shape
+    model = param[3]
     step = 20 # decid how large each paint brush is
 
     if event == cv2.EVENT_MOUSEMOVE:
+        bg_height, bg_width, channels = bg.shape
         x1, y1 = max(0, x-step), max(0, y-step)
-        x2, y2 = min(x+step, overlay_height), min(y+step, overlay_width)
-        
+        x2, y2 = min(x+step, bg_height), min(y+step, bg_width)
+
+        # assume returned "overlay" image has the same size of the img passed in
+        param[1] = dream(model, bg[y1:y2, x1:x2])
+        overlay = param[1]
+
         # make composite
-        composite = cv2.addWeighted(bg[y1:y2, x1:x2],
-                                    alpha1,
-                                    overlay[y1:y2, x1:x2],
-                                    1 - alpha1,
-                                    0)
+        if overlay != None:
+            composite = cv2.addWeighted(bg[y1:y2, x1:x2],
+                                        alpha1,
+                                        overlay,
+                                        1 - alpha1,
+                                        0)
+        else:
+            print("Returned image by dream() is none.")
+
         bg[y1:y2, x1:x2] = composite
         param[0] = bg
 
@@ -38,27 +47,24 @@ def fadeOut(param):
                                1 - alpha2,
                                0)
 
-# e.g. python GUI.py --p1 image1.png --p2 /dir/image2.jpg
+# e.g. python GUI.py -p /path/to/image -m /path/to/model
 parser = argparse.ArgumentParser()
-parser.add_argument('--p1', required=True, type=str, help='Specify path to the base image')
-parser.add_argument('--p2', required=True, type=str, help='Specify path to the second image')
-# parser.add_argument('-m', required=True, type=str, help='Specify path to the model')
+parser.add_argument('-p', required=True, type=str, help='Specify path to the base image')
+parser.add_argument('-m', required=True, type=str, help='Specify path to the model')
 args = parser.parse_args()
 
-# read images
-p1, p2 = cv2.imread(args.p1, 1), cv2.imread(args.p2, 1)
-original, bg, overlay = p1.copy(), p1.copy(), p2.copy()
-param = [bg, overlay, original]
+p = cv2.imread(args.p, 1) # read images
+model = args.m
+bg, original = p.copy(), p.copy()
+param = [bg, None, original, model]
 alpha1 =0.9 # for blend
 alpha2 = 0.96 # for fadeOut
-cropToFit(param)
-
+# cropToFit(param) - not necessary
 while True:
     cv2.namedWindow("Deep-Nightmare")
     cv2.setMouseCallback("Deep-Nightmare", blend, param)
-    cv2.imshow("Deep-Nightmare", param[2])
-    # press key q to exit
-    if cv2.waitKey(100) & 0xFF == ord("q"):
+    cv2.imshow("Deep-Nightmare", param[0]) # display bg
+    if cv2.waitKey(100) & 0xFF == ord("q"): # press key q to exit
         break
     fadeOut(param)
     cv2.waitKey(1)
