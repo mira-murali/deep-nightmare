@@ -61,12 +61,12 @@ mdl = Model()
 mdl.load_state_dict(torch.load(model))
 model = mdl.cuda()
 param = [bg, None, original, model]
+window_name = "Deep-Nightmare"
 
 while True:
-    cv2.namedWindow("Deep-Nightmare")
-    cv2.setWindowProperty("Deep-Nightmare", cv2.WND_PROP_FULLSCREEN,
-                          cv2.WINDOW_FULLSCREEN)    cv2.setMouseCallback("Deep-Nightmare", blend, param)
-    cv2.imshow("Deep-Nightmare", param[0]) # display bg
+    cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
+    cv2.setMouseCallback(window_name, blend, param)
+    cv2.imshow(window_name, param[0]) # display bg
     if cv2.waitKey(100) & 0xFF == ord("q"): # press key q to exit
         break
     fadeOut(param)
