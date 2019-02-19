@@ -19,7 +19,7 @@ There are two kinds of data that this project handles: binary classes (ImPN) and
 ImPN was created with the idea of grouping all images into nightmares and not-nightmares categories. The images were further categorized based on their quality and resemblance to the class they fall under. Thus, the 'Class A' images are the top-grade images, followed by Class B and Class C.
 Once the images are downloaded, please ensure they are in the follow directory structure:
 
-images/
+  images/
 
     Class1/
 
@@ -34,7 +34,8 @@ images/
 In the above example, Class1, Class2, etc. refer to the original folder names in the dataset. Please do not rename these folders. You may, however, rename the parent directory, i.e., 'images/'.
 The final testing images are the same for both ImPN and ANF. Since these are the images on which the dreams or nightmares are going to be projected, these images do not (and should not, for the purposes of this experiment) be categorized into the same classes as the training images.
 Once the images are in the given format, please run ```utils.py``` as follows:
-```python utils.py --data-dir <path-to-folder-containing-images> --ANF 0
+```
+python utils.py --data-dir <path-to-folder-containing-images> --ANF 0
 ```
 In this case, the path would be ```./images```. ```--ANF``` is set to 0 since we are using the ImPN dataset.
 
@@ -44,7 +45,8 @@ You can set the list of grades in ```hyperparameters.py``` you want to use for a
 
 ##### ANF
 Once the ANF dataset is downloaded, you can run ```utils.py``` like before with a slight modification:
-```python utils.py --data-dir <path-to-folder-containing-images> --ANF 1
+```
+python utils.py --data-dir <path-to-folder-containing-images> --ANF 1
 ```
 Once again, please ensure that the path you give is the direct parent directory containing the multiple classes.
 
@@ -52,12 +54,14 @@ When using the ANF dataset, set the 'ANIMALS' parameter in ```hyperparameters.py
 
 #### Training the Model
 As mentioned before, the hyperparameters for the network can be set in ```hyperparameters.py```. Once this is done, the model can be trained by simply calling the ```test.py``` file:
-```python test.py
+```
+python test.py
 ```
 
 While the model is training, checkpoints will be created for each epoch. At the end of training, the code will print the epochs at which the highest accuracy and lowest loss (both validation) were reached. The user can then enter the epoch number for which the experiments should be generated on the training images.
 
 #### Testing The Model
 In the event that there is already a trained model that simply needs to be tested, the path to the checkpoint can be sent in as an argument to ```test.py```:
-```python test.py <path-to-checkpoint>
+```
+python test.py <path-to-checkpoint>
 ```
