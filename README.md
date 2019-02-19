@@ -43,6 +43,8 @@ The code will create a new directory called 'data' and move the classes to the d
 
 You can set the list of grades in ```hyperparameters.py``` you want to use for an experiment. During data loading, depending on the grades specified, new train and validation text files will be created using a combination of the grades and their corresponding image folders.
 
+**NOTE**: If you do not intend to use the ImPN dataset, and opt for ANF instead, please make sure that you still download Final Testing Images from ImPN since these images are common across both datasets. You must run ```utils.py``` as you would for the ImPN dataset with the images directory containing only the Final Testing Images folder. This is the only way that the test.txt file will get written.
+
 ##### ANF
 Once the ANF dataset is downloaded, you can run ```utils.py``` like before with a slight modification:
 ```
