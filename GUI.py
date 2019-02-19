@@ -64,7 +64,8 @@ param = [bg, None, original, model]
 
 while True:
     cv2.namedWindow("Deep-Nightmare")
-    cv2.setMouseCallback("Deep-Nightmare", blend, param)
+    cv2.setWindowProperty("Deep-Nightmare", cv2.WND_PROP_FULLSCREEN,
+                          cv2.WINDOW_FULLSCREEN)    cv2.setMouseCallback("Deep-Nightmare", blend, param)
     cv2.imshow("Deep-Nightmare", param[0]) # display bg
     if cv2.waitKey(100) & 0xFF == ord("q"): # press key q to exit
         break
