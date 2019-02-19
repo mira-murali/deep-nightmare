@@ -19,17 +19,17 @@ There are two kinds of data that this project handles: binary classes (ImPN) and
 ImPN was created with the idea of grouping all images into nightmares and not-nightmares categories. The images were further categorized based on their quality and resemblance to the class they fall under. Thus, the 'Class A' images are the top-grade images, followed by Class B and Class C.
 Once the images are downloaded, please ensure they are in the follow directory structure:
 
-  images/
+    images/
 
-    Class1/
+      Class1/
 
-    Class2/
+      Class2/
 
-    Class3/
+      Class3/
 
-    Class4/
+      Class4/
 
-    Final Test Images/
+      Final Test Images/
 
 In the above example, Class1, Class2, etc. refer to the original folder names in the dataset. Please do not rename these folders. You may, however, rename the parent directory, i.e., 'images/'.
 The final testing images are the same for both ImPN and ANF. Since these are the images on which the dreams or nightmares are going to be projected, these images do not (and should not, for the purposes of this experiment) be categorized into the same classes as the training images.
