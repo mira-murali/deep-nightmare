@@ -257,11 +257,12 @@ def save_images(album, file_name, classification, experiment_path):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--data-dir', default='images/', type=str, help='Specify path to folder containing images')
+    parser.add_argument('--ANF', default=1, type=int, help='Specify if ANF dataset is being used')
     args = parser.parse_args()
+    if not args.ANF:
+        grades = modify_folder()
+        writePathToFile(grades)
+    else:
+        write_data(args.data_dir, file_name = 'all_animals.txt')
+        split_data(os.path.join(os.environ['FILES'], 'all_animals.txt'), shuffle=True)
     
-    grades = modify_folder()
-    writePathToFile(grades)
-    '''
-    write_data(args.data_dir, file_name = 'all_animals.txt')
-    split_data(os.path.join(os.environ['FILES'], 'all_animals.txt'), shuffle=True)
-    '''
